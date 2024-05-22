@@ -1,52 +1,75 @@
+import java.util.ArrayList;
+import java.util.Date;
 
 public abstract class Conta implements IConta {
-	
-	private static final int AGENCIA_PADRAO = 1;
-	private static int SEQUENCIAL = 1;
+    private String numeroConta;
+    protected double saldo;
+    private ArrayList<String> extrato;
+    private Cliente cliente;
 
-	protected int agencia;
-	protected int numero;
-	protected double saldo;
-	protected Cliente cliente;
+    public Conta(String numeroConta, Cliente cliente) {
+        this.numeroConta = numeroConta;
+        this.saldo = 0.0;
+        this.cliente = cliente;
+        this.extrato = new ArrayList<>();
+        registrarOperacao("Conta criada com saldo inicial de R$ 0,00");
+    }
 
-	public Conta(Cliente cliente) {
-		this.agencia = Conta.AGENCIA_PADRAO;
-		this.numero = SEQUENCIAL++;
-		this.cliente = cliente;
-	}
+    @Override
+    public void depositar(double valor) {
+        if (valor > 0) {
+            saldo += valor;
+            registrarOperacao("Deposito de R$ " + valor);
+        } else {
+            System.out.println("Valor de deposito invalido.");
+        }
+    }
 
-	@Override
-	public void sacar(double valor) {
-		saldo -= valor;
-	}
+    @Override
+    public void sacar(double valor) {
+        if (valor > 0 && saldo >= valor) {
+            saldo -= valor;
+            registrarOperacao("Saque de R$ " + valor);
+        } else {
+            System.out.println("Saldo insuficiente ou valor de saque invalido.");
+        }
+    }
 
-	@Override
-	public void depositar(double valor) {
-		saldo += valor;
-	}
+    @Override
+    public void transferir(IConta destino, double valor) {
+        if (valor > 0 && saldo >= valor) {
+            this.sacar(valor);
+            destino.depositar(valor);
+            registrarOperacao("Transferencia de R$ " + valor + " para a conta " + ((Conta) destino).getNumeroConta());
+            ((Conta) destino).registrarOperacao("Transferencia de R$ " + valor + " recebida da conta " + this.numeroConta);
+        } else {
+            System.out.println("Saldo insuficiente ou valor de transferencia invalido.");
+        }
+    }
 
-	@Override
-	public void transferir(double valor, IConta contaDestino) {
-		this.sacar(valor);
-		contaDestino.depositar(valor);
-	}
+    @Override
+    public void imprimirExtrato() {
+        System.out.println("Extrato da conta " + numeroConta + " - Cliente: " + cliente.getNomeCompleto());
+        for (String operacao : extrato) {
+            System.out.println(operacao);
+        }
+        System.out.println("Saldo atual: R$ " + saldo);
+    }
 
-	public int getAgencia() {
-		return agencia;
-	}
+    protected void registrarOperacao(String operacao) {
+        String registro = new Date() + " - " + operacao;
+        extrato.add(registro);
+    }
 
-	public int getNumero() {
-		return numero;
-	}
+    public String getNumeroConta() {
+        return numeroConta;
+    }
 
-	public double getSaldo() {
-		return saldo;
-	}
+    public double getSaldo() {
+        return saldo;
+    }
 
-	protected void imprimirInfosComuns() {
-		System.out.println(String.format("Titular: %s", this.cliente.getNome()));
-		System.out.println(String.format("Agencia: %d", this.agencia));
-		System.out.println(String.format("Numero: %d", this.numero));
-		System.out.println(String.format("Saldo: %.2f", this.saldo));
-	}
+    public Cliente getCliente() {
+        return cliente;
+    }
 }

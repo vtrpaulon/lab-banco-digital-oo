@@ -1,14 +1,7 @@
-
 public class ContaCorrente extends Conta {
+    public ContaCorrente(String numeroConta, Cliente cliente) {
+        super(numeroConta, cliente);
+        registrarOperacao("Conta Corrente criada para " + cliente.getNomeCompleto());
+    }
 
-	public ContaCorrente(Cliente cliente) {
-		super(cliente);
-	}
-
-	@Override
-	public void imprimirExtrato() {
-		System.out.println("=== Extrato Conta Corrente ===");
-		super.imprimirInfosComuns();
-	}
-	
 }
